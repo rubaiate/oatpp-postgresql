@@ -127,7 +127,7 @@ oatpp::Void ResultMapper::readOneRowAsObject(ResultMapper* _this, ResultData* db
 
   auto dispatcher = static_cast<const data::mapping::type::__class::AbstractObject::PolymorphicDispatcher*>(type->polymorphicDispatcher);
   auto object = dispatcher->createObject();
-  const auto& fieldsMap = dispatcher->getProperties()->getMap();
+  const auto& fieldsMap = dispatcher->getProperties()->getDbMap();
 
   for(v_int32 i = 0; i < dbData->colCount; i ++) {
 

@@ -155,6 +155,7 @@ oatpp::Void Deserializer::deserializeString(const Deserializer* _this, const InD
   }
 
   switch(data.oid) {
+    case JSONBOID:
     case TEXTOID:
     case CHAROID:
     case BPCHAROID:
@@ -263,6 +264,8 @@ const oatpp::Type* Deserializer::guessAnyType(const InData& data) {
   switch(data.oid) {
 
     case TEXTOID:
+    case JSONBOID:
+    case JSONOID:
     case VARCHAROID: return oatpp::String::Class::getType();
 
     case INT2OID: return oatpp::Int16::Class::getType();

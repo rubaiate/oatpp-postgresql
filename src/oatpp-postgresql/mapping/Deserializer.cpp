@@ -28,6 +28,8 @@
 #include "Oid.hpp"
 #include "PgArray.hpp"
 #include "oatpp-postgresql/Types.hpp"
+#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "oatpp/parser/json/Utils.hpp"
 
 namespace oatpp { namespace postgresql { namespace mapping {
 
@@ -70,7 +72,7 @@ Deserializer::Deserializer() {
   setDeserializerMethod(data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID, &Deserializer::deserializeArray);
 
   setDeserializerMethod(data::mapping::type::__class::AbstractPairList::CLASS_ID, nullptr);
-  setDeserializerMethod(data::mapping::type::__class::AbstractUnorderedMap::CLASS_ID, nullptr);
+  setDeserializerMethod(data::mapping::type::__class::AbstractUnorderedMap::CLASS_ID, &Deserializer::deserializeUnorderdMap);
 
   ////
 
@@ -95,6 +97,7 @@ oatpp::Void Deserializer::deserialize(const InData& data, const Type* type) cons
     return (*method)(this, data, type);
   }
 
+  
   auto* interpretation = type->findInterpretation(data.typeResolver->getEnabledInterpretations());
   if(interpretation) {
     return interpretation->fromInterpretation(deserialize(data, interpretation->getInterpretationType()));
@@ -163,6 +166,17 @@ oatpp::Void Deserializer::deserializeString(const Deserializer* _this, const InD
   }
 
   throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeString()]: Error. Unknown OID.");
+
+}
+
+oatpp::Void Deserializer::deserializeUnorderdMap(const Deserializer* _this, const InData& data, const Type* type) {
+
+    auto mapper = new oatpp::parser::json::mapping::Deserializer();
+    auto jsonStr = oatpp::String(data.data, data.size);
+
+    oatpp::parser::Caret caret(jsonStr);
+    auto ret = mapper->deserialize(caret, type);
+    return ret;
 
 }
 

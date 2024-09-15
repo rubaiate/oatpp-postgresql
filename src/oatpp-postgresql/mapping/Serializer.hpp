@@ -89,6 +89,7 @@ public:
 private:
 
   static void serializeString(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph);
+  static void serializeUnorderedMap(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph);
 
   static void serializeInt8(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph);
   static void serializeUInt8(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph);

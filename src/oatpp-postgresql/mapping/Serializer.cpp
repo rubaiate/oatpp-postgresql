@@ -28,6 +28,8 @@
 #include "Oid.hpp"
 #include "PgArray.hpp"
 #include "oatpp-postgresql/Types.hpp"
+#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "oatpp/core/data/stream/BufferStream.hpp"
 
 #if defined(WIN32) || defined(_WIN32)
   #include <WinSock2.h>
@@ -69,6 +71,7 @@ void Serializer::setSerializerMethods() {
   setSerializerMethod(data::mapping::type::__class::AbstractVector::CLASS_ID, &Serializer::serializeArray);
   setSerializerMethod(data::mapping::type::__class::AbstractList::CLASS_ID, &Serializer::serializeArray);
   setSerializerMethod(data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID, &Serializer::serializeArray);
+  setSerializerMethod(data::mapping::type::__class::AbstractUnorderedMap::CLASS_ID, &Serializer::serializeUnorderedMap);
 
   ////
 
@@ -117,6 +120,7 @@ void Serializer::setTypeOidMethods() {
   setTypeOidMethod(data::mapping::type::__class::AbstractVector::CLASS_ID, &Serializer::get1DCollectionOid);
   setTypeOidMethod(data::mapping::type::__class::AbstractList::CLASS_ID, &Serializer::get1DCollectionOid);
   setTypeOidMethod(data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID, &Serializer::get1DCollectionOid);
+  setTypeOidMethod(data::mapping::type::__class::AbstractUnorderedMap::CLASS_ID, &Serializer::getTypeOid<JSONOID>);
 
   setTypeOidMethod(data::mapping::type::__class::AbstractEnum::CLASS_ID, &Serializer::getEnumTypeOid);
   setArrayTypeOidMethod(data::mapping::type::__class::AbstractEnum::CLASS_ID, &Serializer::getEnumArrayTypeOid);
@@ -243,6 +247,24 @@ void Serializer::serializeString(const Serializer* _this, OutputData& outData, c
     outData.dataSize = buff->size();
     outData.dataFormat = 1;
     outData.oid = TEXTOID;
+  } else {
+    serNull(outData);
+  }
+}
+
+void Serializer::serializeUnorderedMap(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph) {
+  (void) _this;
+    auto mapper = new oatpp::parser::json::mapping::Serializer();
+    oatpp::data::stream::BufferOutputStream stream;
+
+    mapper->serializeToStream(&stream, polymorph);
+
+  if(polymorph) {
+    std::string* buff = new std::string(stream.toString()); // memory leak
+    outData.data = (char *)buff->data();
+    outData.dataSize = buff->size();
+    outData.dataFormat = 1;
+    outData.oid = JSONOID;
   } else {
     serNull(outData);
   }
